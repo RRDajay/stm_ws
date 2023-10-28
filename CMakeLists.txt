@@ -28,16 +28,16 @@ add_subdirectory(FreeRTOS-Kernel)
 #####################################################################
 set(STM32CUBEMX_GENERATED_FILES
     
-    Core/Src
     Core/Src/gpio.c
     Core/Src/main.c
     Core/Src/stm32f1xx_hal_msp.c
+    Core/Src/stm32f1xx_hal_timebase_tim.c
     Core/Src/stm32f1xx_it.c
     Core/Src/syscalls.c
     Core/Src/sysmem.c
     Core/Src/system_stm32f1xx.c
     Core/Src/usart.c
-
+    
     Drivers/STM32F1xx_HAL_Driver/Src
     Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.c
     Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.c
@@ -81,8 +81,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
         FreeRTOS-Kernel/portable/GCC/ARM_CM3
         )
 
-# target_link_libraries(${PROJECT_NAME} 
-#     PRIVATE freertos_kernel)
+target_link_libraries(${PROJECT_NAME} 
+    PRIVATE freertos_kernel)
 
 target_link_options(${PROJECT_NAME} PRIVATE
     -T${CMAKE_SOURCE_DIR}/STM32F103C8TX_FLASH.ld
