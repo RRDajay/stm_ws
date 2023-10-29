@@ -20,8 +20,6 @@
 #include "main.h"
 #include "usart.h"
 #include "gpio.h"
-#include "FreeRTOS.h"
-#include "task.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -57,14 +55,7 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-static void heartbeatTask(void* param)
-{
-  for(;;)
-  {
-    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-    vTaskDelay(1000);
-  }
-}
+
 /* USER CODE END 0 */
 
 /**
@@ -102,19 +93,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
-  BaseType_t result = xTaskCreate(heartbeatTask, "heartBeatTask", 2048, NULL, 1, NULL);
-
-  vTaskStartScheduler();
-  
-  while (1)
-  {
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-    __NOP();
-    
-  }
+  app_main();
   /* USER CODE END 3 */
 }
 

@@ -28,6 +28,7 @@ add_subdirectory(FreeRTOS-Kernel)
 #####################################################################
 set(STM32CUBEMX_GENERATED_FILES
     
+    Core/Src/app_main.cpp
     Core/Src/gpio.c
     Core/Src/main.c
     Core/Src/stm32f1xx_hal_msp.c
