@@ -11,6 +11,8 @@ enable_language(C CXX ASM)
 # Build freeRTOS kernel as a static library                         #
 #####################################################################
 add_library(freertos_config INTERFACE)
+set( FREERTOS_HEAP "4" CACHE STRING "" FORCE)
+# Select the native compile PORT
 set(FREERTOS_PORT GCC_ARM_CM3 CACHE STRING "")
 
 target_include_directories(freertos_config SYSTEM

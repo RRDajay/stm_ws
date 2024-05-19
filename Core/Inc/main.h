@@ -36,7 +36,7 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-extern int app_main();
+extern void app_main(void);
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

@@ -113,7 +113,7 @@ to exclude the API function. */
 //define USE_FreeRTOS_HEAP_1
 //define USE_FreeRTOS_HEAP_2
 //define USE_FreeRTOS_HEAP_3
-//define USE_FreeRTOS_HEAP_4
+// define USE_FreeRTOS_HEAP_4
 //define USE_FreeRTOS_HEAP_5
 
 */
