@@ -11,12 +11,12 @@ enable_language(C CXX ASM)
 # Build freeRTOS kernel as a static library                         #
 #####################################################################
 add_library(freertos_config INTERFACE)
-set( FREERTOS_HEAP "4" CACHE STRING "" FORCE)
+set(FREERTOS_HEAP "4" CACHE STRING "" FORCE)
 # Select the native compile PORT
 set(FREERTOS_PORT GCC_ARM_CM3 CACHE STRING "")
 
 target_include_directories(freertos_config SYSTEM
-    INTERFACE Core/Inc)
+    INTERFACE external/stmcubemx/Core/Inc)
 target_compile_options(freertos_config INTERFACE
     -mcpu=cortex-m3
     -mthumb
@@ -28,43 +28,17 @@ add_subdirectory(FreeRTOS-Kernel)
 #####################################################################
 # Build the firmware                                                #
 #####################################################################
-set(STM32CUBEMX_GENERATED_FILES
+set(STMCUBE32MX_GENERATED_CODE stm32generatedcode)
+set(APPLICATION_FILES
+    app/app_main.cpp)
     
-    Core/Src/app_main.cpp
-    Core/Src/gpio.c
-    Core/Src/main.c
-    Core/Src/stm32f1xx_hal_msp.c
-    Core/Src/stm32f1xx_hal_timebase_tim.c
-    Core/Src/stm32f1xx_it.c
-    Core/Src/syscalls.c
-    Core/Src/sysmem.c
-    Core/Src/system_stm32f1xx.c
-    Core/Src/usart.c
-    
-    Drivers/STM32F1xx_HAL_Driver/Src
-    Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.c
-    Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.c
-    Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c
-    Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c
-    Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.c
-    Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.c
-    Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.c
-    Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.c
-    Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.c
-    Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c
-    Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c
-    Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c
-    Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c
-    Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.c
-    
-    # Startup code in assembly
-    Core/Startup/startup_stm32f103c8tx.s)
-
-add_executable(${PROJECT_NAME} ${STM32CUBEMX_GENERATED_FILES})
+# Build the main target application code
+add_subdirectory(external)
+add_executable(${PROJECT_NAME} ${APPLICATION_FILES})
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE 
-        -DUSE_HAL_DRIVER 
-        -DSTM32F103xB)
+    -DUSE_HAL_DRIVER 
+    -DSTM32F103xB)
 
 target_compile_options(${PROJECT_NAME} PRIVATE
     -mcpu=cortex-m3
@@ -75,24 +49,23 @@ target_compile_options(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Debug>:-Og -gdwarf-2>)
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
-        Core/Inc
-        Drivers/STM32F1xx_HAL_Driver/Inc
-        Drivers/STM32F1xx_HAL_Driver/Inc/Legacy
-        Drivers/CMSIS/Device/ST/STM32F1xx/Include
-        Drivers/CMSIS/Include
-        FreeRTOS-Kernel/include
-        FreeRTOS-Kernel/portable/GCC/ARM_CM3
-        )
+    external/stmcubemx/Core/Inc
+    external/stmcubemx/Drivers/STM32F1xx_HAL_Driver/Inc
+    external/stmcubemx/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy
+    external/stmcubemx/Drivers/CMSIS/Device/ST/STM32F1xx/Include
+    external/stmcubemx/Drivers/CMSIS/Include
+    FreeRTOS-Kernel/include
+    FreeRTOS-Kernel/portable/GCC/ARM_CM3)
 
 target_link_libraries(${PROJECT_NAME} 
-    PRIVATE freertos_kernel)
+    PRIVATE freertos_kernel ${STMCUBE32MX_GENERATED_CODE})
 
 target_link_options(${PROJECT_NAME} PRIVATE
-    -T${CMAKE_SOURCE_DIR}/STM32F103C8TX_FLASH.ld
+    -T${CMAKE_SOURCE_DIR}/external/stmcubemx/STM32F103C8TX_FLASH.ld
     -mcpu=cortex-m3
     -mthumb
-    -specs=nano.specs
-    # -specs=nosys.specs
+    # -specs=nano.specs
+    -specs=nosys.specs
     -lc
     -lm
     # -lnosys
