@@ -24,7 +24,7 @@ target_compile_options(freertos_config INTERFACE
     -ffunction-sections
     -Wall
     $<$<CONFIG:Debug>:-Og -gdwarf-2>)
-add_subdirectory(FreeRTOS-Kernel)
+add_subdirectory(external/FreeRTOS-Kernel)
 #####################################################################
 # Build the firmware                                                #
 #####################################################################
