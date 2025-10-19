@@ -1,10 +1,7 @@
-cmake_minimum_required(VERSION 3.10.0)
+cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 #####################################################################
 # Setup the toolchain                                               #
 #####################################################################
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/arm-gcc-toolchain.cmake)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL ON FORCE)
-
 project(stm32h750b)
 enable_language(C CXX ASM)
 
@@ -42,84 +39,89 @@ endif()
 # Build ThreadX as a static library                                 #
 #####################################################################
 if (NOT TX_USER_FILE)
-    set(TX_USER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc/tx_user.h)
-    message(STATUS "Using ${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc/tx_user.h")
+    set(TX_USER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/app/os/inc/tx_user.h)
+    message(STATUS "Using ${CMAKE_CURRENT_SOURCE_DIR}/app/os/inc/tx_user.h")
 endif()
-add_subdirectory(threadx)
+add_subdirectory(external/threadx)
 
 #####################################################################
-# Build the firmware                                                #
+# Separate the Application, BSP, and OS specific files              #
 #####################################################################
-set(STM32CUBEMX_GENERATED_FILES
+# Application specific files
+set(APPLICATION_SPECIFIC_SOURCE_FILES
+        app/main_app/src/main.c)
 
-        Core/Src/main.c
-        Core/Src/stm32h7xx_hal_msp.c
-        Core/Src/stm32h7xx_hal_timebase_tim.c
-        Core/Src/stm32h7xx_it.c
-        Core/Src/syscalls.c
-        Core/Src/sysmem.c
-        Core/Src/system_stm32h7xx.c
+set(APPLICATION_SPECIFIC_INCLUDES
+        app/main_app/inc)
 
-        # STM32 HAL drivers.
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc_ex.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr_ex.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mdma.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_hsem.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_gpio.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash_ex.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_exti.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma_ex.c
-        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c
+# Vendor board specific files
+set(BSP_SOURCE_FILES
+        app/bsp/src/stm32h7xx_hal_msp.c
+        app/bsp/src/stm32h7xx_hal_timebase_tim.c
+        app/bsp/src/stm32h7xx_it.c
+        app/bsp/src/syscalls.c
+        app/bsp/src/sysmem.c
+        app/bsp/src/system_stm32h7xx.c
+        app/bsp/src/startup_stm32h750xbhx.s
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc_ex.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr_ex.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mdma.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_hsem.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_gpio.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash_ex.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_exti.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma_ex.c
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c)
 
-        # Startup code
-        Core/Startup/startup_stm32h750xbhx.s
+set(BSP_INCLUDES
+        app/bsp/inc
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Inc
+        external/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy
+        external/STM32CubeH7/Drivers/CMSIS/Device/ST/STM32H7xx/Include
+        external/STM32CubeH7/Drivers/CMSIS/Include)
 
-        # ThreadX 
-        Core/Src/tx_initialize_low_level.S
-        Core/Src/app_threadx.c
-        AZURE_RTOS/App/app_azure_rtos.c)
-
-add_executable(${PROJECT_NAME} ${STM32CUBEMX_GENERATED_FILES})
-
-target_compile_definitions(${PROJECT_NAME} PRIVATE
+set(BSP_DEFINES
         -DUSE_PWR_LDO_SUPPLY
         -DUSE_HAL_DRIVER 
         -DSTM32H750xx)
 
-target_compile_options(${PROJECT_NAME} PRIVATE
-        -ffunction-sections
-        -fdata-sections
-        -fstack-usage
-        -Wall)
+set(BSP_LINKER_FILE ${CMAKE_SOURCE_DIR}/STM32H750XBHX_FLASH.ld)
 
-target_include_directories(${PROJECT_NAME} PRIVATE 
-        Core/Inc
-        Drivers/STM32H7xx_HAL_Driver/Inc
-        Drivers/STM32H7xx_HAL_Driver/Inc/Legacy
-        Drivers/CMSIS/Device/ST/STM32H7xx/Include
-        Drivers/CMSIS/Include
+# OS specific files
+set(OS_SOURCE_SPECIFIC_FILES
+        app/os/src/app_threadx.c
+        app/os/src/app_azure_rtos.c
+        app/os/src/tx_initialize_low_level.S)
 
-        # ThreadX
-        AZURE_RTOS/App)
+set(OS_SOURCE_SPECIFIC_INCLUDES
+        app/os/inc)
 
-target_link_options(${PROJECT_NAME} PRIVATE
-        -T${CMAKE_SOURCE_DIR}/STM32H750XBHX_FLASH.ld
-        -lc 
-        -lm
-        # -lnosys
-        -Wl,-Map=${PROJECT_NAME}.map,--cref
-        -Wl,--gc-sections)
+#####################################################################
+# Build the BSP as a static library                                 #
+#####################################################################
+add_library(bsp STATIC ${BSP_SOURCE_FILES})
+target_include_directories(bsp PRIVATE ${BSP_INCLUDES})
+target_compile_definitions(bsp PRIVATE ${BSP_DEFINES})
+target_compile_options(bsp PRIVATE -ffunction-sections -fdata-sections -fstack-usage -Wall)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE threadx)
+#####################################################################
+# Build the firmware                                                #
+#####################################################################
+add_executable(${PROJECT_NAME} ${APPLICATION_SPECIFIC_SOURCE_FILES} ${OS_SOURCE_SPECIFIC_FILES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${APPLICATION_SPECIFIC_INCLUDES} ${BSP_INCLUDES} ${OS_SOURCE_SPECIFIC_INCLUDES})
+target_compile_definitions(${PROJECT_NAME} PRIVATE ${BSP_DEFINES})
+target_compile_options(${PROJECT_NAME} PRIVATE -ffunction-sections -fdata-sections -fstack-usage -Wall)
+target_link_options(${PROJECT_NAME} PRIVATE -T${BSP_LINKER_FILE} -lc -lm -Wl,-Map=${PROJECT_NAME}.map,--cref -Wl,--gc-sections)
+target_link_libraries(${PROJECT_NAME} PRIVATE threadx bsp)
 
 #####################################################################
 # Add custom post-build commands                                    #
