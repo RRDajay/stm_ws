@@ -19,12 +19,12 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
 # Built for ThreadX
-# set(THREADX_ARCH "cortex_m7")
-# set(THREADX_TOOLCHAIN "gnu")
+set(THREADX_ARCH "cortex_m7")
+set(THREADX_TOOLCHAIN "gnu")
 
 # Default compiler flags
 set(MCPU_FLAGS "-mthumb -mcpu=cortex-m7")
-set(VFP_FLAGS "")
+set(VFP_FLAGS "-mfloat-abi=hard -mfpu=fpv5-d16")
 set(SPEC_FLAGS "--specs=nosys.specs")
 # set(LD_FLAGS "-nostartfiles")
 

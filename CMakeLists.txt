@@ -41,43 +41,52 @@ endif()
 #####################################################################
 # Build ThreadX as a static library                                 #
 #####################################################################
-# add_subdirectory(threadx)
+if (NOT TX_USER_FILE)
+    set(TX_USER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc/tx_user.h)
+    message(STATUS "Using ${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc/tx_user.h")
+endif()
+add_subdirectory(threadx)
 
 #####################################################################
 # Build the firmware                                                #
 #####################################################################
 set(STM32CUBEMX_GENERATED_FILES
 
-    Core/Src/main.c
-    Core/Src/stm32h7xx_hal_msp.c
-    Core/Src/stm32h7xx_hal_timebase_tim.c
-    Core/Src/stm32h7xx_it.c
-    Core/Src/syscalls.c
-    Core/Src/sysmem.c
-    Core/Src/system_stm32h7xx.c
+        Core/Src/main.c
+        Core/Src/stm32h7xx_hal_msp.c
+        Core/Src/stm32h7xx_hal_timebase_tim.c
+        Core/Src/stm32h7xx_it.c
+        Core/Src/syscalls.c
+        Core/Src/sysmem.c
+        Core/Src/system_stm32h7xx.c
 
-    # STM32 HAL drivers.
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc_ex.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr_ex.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mdma.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_hsem.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_gpio.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash_ex.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_exti.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma_ex.c
-    Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c
+        # STM32 HAL drivers.
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc_ex.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr_ex.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mdma.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_hsem.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_gpio.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash_ex.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_exti.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma_ex.c
+        Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c
 
-    # Startup code
-    Core/Startup/startup_stm32h750xbhx.s)
+        # Startup code
+        Core/Startup/startup_stm32h750xbhx.s
+
+        # ThreadX 
+        Core/Src/tx_initialize_low_level.S
+        Core/Src/app_threadx.c
+        AZURE_RTOS/App/app_azure_rtos.c)
 
 add_executable(${PROJECT_NAME} ${STM32CUBEMX_GENERATED_FILES})
 
@@ -87,16 +96,10 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
         -DSTM32H750xx)
 
 target_compile_options(${PROJECT_NAME} PRIVATE
-    # -std=gnu11
-    # -mcpu=cortex-m7
-    # -mthumb
-    # -mfpu=fpv5-d16
-    # -mfloat-abi=hard
-    # -march=armv7e-m
-    # -ffunction-sections
-    # -fdata-sections
-    # -fstack-usage
-    -Wall)
+        -ffunction-sections
+        -fdata-sections
+        -fstack-usage
+        -Wall)
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
         Core/Inc
@@ -104,23 +107,19 @@ target_include_directories(${PROJECT_NAME} PRIVATE
         Drivers/STM32H7xx_HAL_Driver/Inc/Legacy
         Drivers/CMSIS/Device/ST/STM32H7xx/Include
         Drivers/CMSIS/Include
-        AZURE_RTOS/App
-        )
+
+        # ThreadX
+        AZURE_RTOS/App)
 
 target_link_options(${PROJECT_NAME} PRIVATE
-    -T${CMAKE_SOURCE_DIR}/STM32H750XBHX_FLASH.ld
-    # -mcpu=cortex-m7
-    # -mthumb
-    # -mfpu=fpv5-d16
-    # -mfloat-abi=hard
-    # -march=armv7e-m
-    # -lc 
-    # -lm
-    # -lnosys
-    -Wl,-Map=${PROJECT_NAME}.map,--cref
-    -Wl,--gc-sections)
+        -T${CMAKE_SOURCE_DIR}/STM32H750XBHX_FLASH.ld
+        -lc 
+        -lm
+        # -lnosys
+        -Wl,-Map=${PROJECT_NAME}.map,--cref
+        -Wl,--gc-sections)
 
-# target_link_libraries(${PROJECT_NAME} PRIVATE threadx)
+target_link_libraries(${PROJECT_NAME} PRIVATE threadx)
 
 #####################################################################
 # Add custom post-build commands                                    #
