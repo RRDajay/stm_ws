@@ -1,0 +1,41 @@
+# Build output
+/build/
+/Debug/
+/Release/
+*.elf
+*.bin
+*.hex
+*.map
+*.list
+*.su
+*.o
+*.d
+*.a
+*.obj
+*.exe
+*.log
+*.size.*
+*.stdout
+
+# CubeMX/IDE generated files
+*.launch
+*.settings/
+*.cproject
+*.project
+*.ioc
+*.mxproject
+
+# VSCode
+.vscode/
+
+# CMake files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Other
+*.swp
+*.bak
+*.tmp
+
